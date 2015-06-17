@@ -1,0 +1,14 @@
+module.exports = {
+	"general": {
+		"imagenes": {"thumbnail" : "./thumbnails/", "picUrl": "./images/"},
+		"webUrl": "http://theoutsidersbooks.tk/images/",
+		"formatoImagen": "jpg",
+		"noImage": "http://theoutsidersbooks.tk/images/outsiders.jpg"
+	},
+	"recursos": {
+		"casaDelLibro": {
+			"url": "www.casadellibro.com",
+			"nombre": "casa del libro"
+		}
+	}
+}
