@@ -21,7 +21,16 @@ if(argumentos.debug == 'true') console.log(argumentos);
 var sitio = new Sitio(argumentos);
 sitio.getDominio();
 sitio.getNombre();
-sitio.getLinks(function() {
-	console.log(sitio)
-	sitio.getLibros();
-})
+sitio.getLinks()
+	.then(function() {
+		sitio.getLibros();
+	})
+	.catch(function(err) {
+		console.log(err)
+	})
+
+
+//(function() {
+//	console.log(sitio)
+//	sitio.getLibros();
+//})

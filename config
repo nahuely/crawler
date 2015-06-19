@@ -8,7 +8,20 @@ module.exports = {
 	"recursos": {
 		"casaDelLibro": {
 			"url": "www.casadellibro.com",
-			"nombre": "casa del libro"
+			"nombre": "casa del libro",
+			"imagenInvalida": "defecto",
+			"paginacion": "div.mod-list-item div.txt > a",
+			"html": {
+				"titulo": "h1.book-header-2-title",
+				"autores": "h2.book-header-2-subtitle .book-header-2-subtitle-author",
+				"descripcion": "div.book-description p",
+				"detalles": "div.book-description ul li",
+				"precio": "span.fnt08.grisPedido",
+				"status": "h3.item-status",
+				"formato": "span.book-header-2-title-device",
+				"thumbnail": "img#imgPrincipal",
+				"imgGrande": "img#imgPrincipal"
+			}
 		}
 	}
 }

@@ -4,8 +4,9 @@ var urlParser = require('url');
 var Q = require('q');
 var cheerio = require('cheerio')
 var async = require('async');
-var Book = require("./book");
+var Book = require('./book');
 var child = require("child_process").exec;
+var fs = require('fs');
 
 function Sitio(params) {
 	if(params.url != undefined) {
@@ -48,7 +49,8 @@ Sitio.prototype.getNombre = function() {
 	return this;
 }
 
-Sitio.prototype.getLinks = function(callback) {
+Sitio.prototype.getLinks = function() {
+	var deferred = Q.defer();
 	var that = this;
 	var q = async.queue(function (task, callback) {
 		that.getLinksPage(task)
@@ -69,10 +71,15 @@ Sitio.prototype.getLinks = function(callback) {
 		q.push(this.url + '?page=' + x);
 	}
 
-	q.drain = function(err) {
-		that.linksLen = that.links.length;
-	  	callback();
+	q.drain = function() {
+		if(that.errors.length === that.links) {
+			deferred.reject(that.errors);
+		} else {
+			that.linksLen = that.links.length;
+			deferred.resolve();
+		}
 	}
+	return deferred.promise;
 }
 
 Sitio.prototype.getLinksPage = function(url) {
@@ -97,7 +104,7 @@ Sitio.prototype.getLinksPage = function(url) {
 Sitio.prototype.parseLinksPage = function(data) {
 	var result = [];
 	$ = cheerio.load(data);
-	var links = $('div.mod-list-item div.txt > a');
+	var links = $(config.recursos[this.codigo].paginacion);
 	var linksLen = links.length;
 	for(var x = 0; x < linksLen; x++) {
 		result.push($(links[x]).attr('href'));
@@ -108,43 +115,45 @@ Sitio.prototype.parseLinksPage = function(data) {
 Sitio.prototype.getLibros = function() {
 	var that = this;
 	if(this.links) {
-		var tiempoInicial = new Date();
+		var tiempoInicial = new Date();		
 		var q = async.queue(function (task, callback) {
-			that.getBookData('casperjs' + ' ' + 'getDetail.js' + ' ' + that.dominio + task + ' ' + JSON.stringify(config.recursos[that.codigo]) + ' ' + that.codigo, {encoding: 'utf-8'})
+			var command  = 'casperjs getDetail.js "' + 'http://' + that.dominio + task + '" \'' + JSON.stringify(config.recursos[that.codigo]) + '\' ' + that.codigo;
+			that.getBookData(command, {encoding:'utf-8'})
 				.then(function(data) {
-					console.log("asdas");
+					var book = JSON.parse(data);
+					console.log(book)
+					if(book.thumbnail) {
+						request(book.thumbnail).pipe(fs.createWriteStream('./asdas'));
+					}
 					callback();
 				})
 				.catch(function(err) {
-					callback("asdas");
+					callback(err);
 				})
-		}, 4);
+		}, 6);
 
 		for(var x = 0; x < this.linksLen; x++) {
-			console.log(this.links[x])
 			q.push(this.links[x]);
 		}
 
 		q.drain = function(err) {
-			console.log("termino de bajar todos los libros")
 			var tiempoFinal = new Date();
 			that.timeToGetBooks = (tiempoFinal.getTime() - tiempoInicial.getTime()) / 1000;
-			//this.porcentajeDescargado = (this.librosLen * 100) / this.linksLen;
 		}
 	}
 }
 
-Sitio.prototype.getBookData = function(comand, options) {
+Sitio.prototype.getBookData = function(command, options) {
 	var deferred = Q.defer();
 
-	child(comand, options, function(error, stdout, stderr) {
-		if (error) {
-	    	deferred.reject(error);
+	child(command, options, function(error, stdout, stderr) {
+		if (error || stderr) {
+	    	deferred.reject(error || stderr);
+	    } else {
+	    	deferred.resolve(stdout);    
 	    }
-
-	    deferred.resolve(JSON.parse(stdout));    
-		return deferred.promise;
 	})
+	return deferred.promise;
 }
 
 module.exports = Sitio;
