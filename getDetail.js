@@ -1,6 +1,6 @@
 var casper = require("casper").create({pageSettings: {loadImages:  false, loadPlugins: false}});
-casper.options.waitTimeout = 600;
-casper.options.retryTimeout = 30;
+casper.options.waitTimeout = 1500;
+//casper.options.retryTimeout = 80;
 casper.options.silentErrors = false;
 
 var utils = require("utils");
@@ -46,26 +46,28 @@ function getAttributes(url, config, libreria) {
 		var autores = getStringArr(config.html.autores);
 		var autoresLength = autores.length;
 		var result = '';
-		for(var x = 0; x < autoresLength; x++) {
-			if(x === autoresLength - 1) {
-				result += autores[x].innerText + '';
-			} else {
-				result += autores[x].innerText + ', ';
-			}
-		}
+		if(autoresLength) {
+			for(var x = 0; x < autoresLength; x++) {
+				if(x === autoresLength - 1) {
+					result += autores[x].innerText + '';
+				} else {
+					result += autores[x].innerText + ', ';
+				}
+			}	
+		}		
 		return result;
 	}
 
 	function getDescripcion() {
 		var result = getString(config.html.descripcion, 'txt');
-		result = result.replace(/("|\n)/gm, function(x) {
-			switch(x) {
-				case '\n':
-					return '<br>';
-				case '"':
-					return '\'';
-			}
-		});
+		if(result) {
+			result = result.replace(/(")/gm, function(x) {
+				switch(x) {
+					case '"':
+						return '\'';
+				}
+			});
+		}
 		return result;
 	}
 
@@ -102,43 +104,60 @@ function getAttributes(url, config, libreria) {
 	function ulToJson() {
 		var lista = document.querySelectorAll(config.html.detalles);
 		var listaLength = lista.length;
-		for(var x = 0; x < listaLength; x++) {
-			var item = lista[x];
-			var propiedad = item.childNodes[0].innerText.trim();
-			switch(propiedad) {
-				case 'Nº de páginas:':
-					libro.paginas = item.childNodes[1].textContent.replace(/[^\d]/g, '');
-					break;
-				case 'Editorial:':
-					libro.editorial = item.childNodes[2].innerText.toLowerCase().trim();
-					break;
-				case 'Encuadernación:':
-					libro.encuadernacion = item.childNodes[1].textContent.toLowerCase().trim();
-					break;
-				case 'Lengua:':
-					libro.idioma = item.childNodes[1].textContent.toLowerCase().trim();
-					break;
-				case 'ISBN:':
-					libro.isbn = item.childNodes[1].textContent.trim();
-					break;
-				case 'Año edición:':
-					libro.edicion = item.childNodes[1].textContent.trim();
-					break;
-			}
+		if(listaLength) {
+			for(var x = 0; x < listaLength; x++) {
+				var result;
+				var item = lista[x];
+				var propiedad = item.childNodes[0].textContent.trim();
+				var validPro = item.childNodes.length;
+				if(propiedad && validPro > 1) {
+					switch(propiedad) {
+						case 'Nº de páginas:':
+							result = item.childNodes[1];
+							libro.paginas = result ? result.textContent.replace(/[^\d]/g, '') : '';
+							break;
+						case 'Editorial:':
+							result = item.childNodes[2];
+							libro.editorial = result ? result.textContent.toLowerCase().trim() : '';
+							break;
+						case 'Encuadernación:':
+							result = item.childNodes[1];
+							libro.encuadernacion = result ? result.textContent.toLowerCase().trim() : '';
+							break;
+						case 'Lengua:':
+							result = item.childNodes[1];
+							libro.idioma = result ? result.textContent.toLowerCase().trim() : '';
+							break;
+						case 'ISBN:':
+							result = item.childNodes[1];
+							libro.isbn = result ? result.textContent.trim() : '';
+							break;
+						case 'Año edición:':
+							result = item.childNodes[1];
+							libro.edicion = result ? result.textContent.trim() : '';
+							break;
+					}					
+				}
+			}			
 		}
 	}
 
 	var libro = {};
-	libro.titulo = getTitulo();
-	libro.autor = getAutores();
-	libro.formato = getFormato();
 	libro.precio = getPrecio();
-	libro.status = getStatus();
-	libro.thumbnail = getThumbnail();
-	libro.imgGrande = libro.thumbnail ? getImgGrande() : '';
-	libro.descripcion = getDescripcion();
-	libro.url = url;
-	ulToJson();
+	libro.titulo = getTitulo();
+
+	if(libro.precio && libro.titulo) {
+		libro.autor = getAutores();
+		libro.formato = getFormato();
+		libro.status = getStatus();
+		libro.thumbnail = getThumbnail();
+		libro.imgGrande = libro.thumbnail ? getImgGrande() : '';
+		libro.descripcion = getDescripcion();
+		ulToJson();
+		libro.url = url;		
+	} else {
+		libro = null;
+	}
 	
 	return libro;
 }

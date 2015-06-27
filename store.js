@@ -4,9 +4,9 @@ var urlParser = require('url');
 var Q = require('q');
 var cheerio = require('cheerio')
 var async = require('async');
-var Book = require('./book');
 var child = require("child_process").exec;
 var fs = require('fs');
+var Book = require("./book");
 
 function Sitio(params) {
 	if(params.url != undefined) {
@@ -17,6 +17,7 @@ function Sitio(params) {
 		this.fecha = new Date();
 		this.dominio = '';
 		this.links = [];
+		this.libros = [];
 		this.nombre = '';
 		this.codigo = '';
 		this.linksLen = 0;
@@ -65,7 +66,7 @@ Sitio.prototype.getLinks = function() {
 				that.errors.push(err);
 				callback(err);
 			})
-	}, 6);
+	}, 8);
 
 	for(var x = this.inicio; x <= this.final; x++) {
 		q.push(this.url + '?page=' + x);
@@ -76,6 +77,7 @@ Sitio.prototype.getLinks = function() {
 			deferred.reject(that.errors);
 		} else {
 			that.linksLen = that.links.length;
+			console.log(that.links)
 			deferred.resolve();
 		}
 	}
@@ -120,17 +122,43 @@ Sitio.prototype.getLibros = function() {
 			var command  = 'casperjs getDetail.js "' + 'http://' + that.dominio + task + '" \'' + JSON.stringify(config.recursos[that.codigo]) + '\' ' + that.codigo;
 			that.getBookData(command, {encoding:'utf-8'})
 				.then(function(data) {
-					var book = JSON.parse(data);
-					console.log(book)
-					if(book.thumbnail) {
-						request(book.thumbnail).pipe(fs.createWriteStream('./asdas'));
+					var libro = JSON.parse(data);
+					console.log(libro);
+					if(libro === null) {
+						throw new Error("llego con null");
 					}
-					callback();
+					if(!libro.isbn || !libro.precio) {
+						throw new Error("no tiene isbn");
+					}
+
+					if(!libro.isbn || !libro.precio) {
+						throw new Error("no tiene precio");
+					}	
+					that.libros.push(libro);
+					return libro;
+				})
+				.then(function(data) {
+					if(data.imgGrande) {
+						that.getImage(data.imgGrande, config.general.imagenes.picUrl + data.isbn + '.jpg');					
+					}
+					return data;
+				})
+				.then(function(data) {
+					try {
+						var libro = new Book(data, that.nombre, that.identificador);
+					} catch(e) {
+						throw new Error("no se pudo crear el libro");
+					}
+					return libro.guardarLibro();
+				})
+				.then(function() {
+					callback();					
 				})
 				.catch(function(err) {
+					console.log(err);
 					callback(err);
 				})
-		}, 6);
+		}, 5);
 
 		for(var x = 0; x < this.linksLen; x++) {
 			q.push(this.links[x]);
@@ -156,4 +184,25 @@ Sitio.prototype.getBookData = function(command, options) {
 	return deferred.promise;
 }
 
+Sitio.prototype.getImage = function(origin, dest) {
+	var deferred = Q.defer();
+	var r = request(origin);
+	var w = fs.createWriteStream(dest);
+
+	r.on('error', function(err) {
+		deferred.reject(err);
+	})
+
+	r.pipe(w);
+
+	w.on('finish', function() {
+		deferred.resolve();
+	})
+
+ 	r.on('end', function () { });
+
+ 	return deferred.promise;
+}
+
 module.exports = Sitio;
+
