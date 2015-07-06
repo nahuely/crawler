@@ -3,6 +3,7 @@ var async = require('async');
 var imageDefault = './default.jpg';
 var imageSize = fs.statSync(imageDefault).size;
 var imagenesFiltradas = [];
+var sizeOf = require('image-size');
 
 var mongoose = require("mongoose");
 var Q = require('q');
@@ -33,14 +34,27 @@ var libro = mongoose.model("libro", libroSchema);
 
 var imagenes = fs.readdirSync('./images');
 imagenes.forEach(function(item) {
+	var hasWrongSize = false;
 	var imageAux = fs.statSync('images/' + item).size;
-	if(imageAux === imageSize) {
-		item = item.slice(0, item.indexOf('.'));
-		imagenesFiltradas.push(item)
+	var file = 'images/' + item;
+	try {
+		var dimensions = sizeOf(file);
+		if(dimensions.width >= 250 || dimensions.height >= 250) {
+			hasWrongSize = false;
+		} else {
+			hasWrongSize = true;
+		}
+	} catch(e) {
+		if(e.message === "unsupported file type") {
+			hasWrongSize = true;
+		}
+	} finally {
+		if(imageAux === imageSize || hasWrongSize) {
+			item = item.slice(0, item.indexOf('.'));
+			imagenesFiltradas.push(item)
+		}		
 	}
 })
-
-console.log(imagenesFiltradas)
 
 for(var x = 0; x < imagenesFiltradas.length; x++) {
 	libro.findOne({ isbn: imagenesFiltradas[x] }, function (err, doc){
