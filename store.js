@@ -1,15 +1,17 @@
+'use strict';
+
 var request = require('request');
 var config = require('./config');
 var urlParser = require('url');
 var Q = require('q');
 var cheerio = require('cheerio')
 var async = require('async');
-var child = require("child_process").exec;
+var child = require('child_process').exec;
 var fs = require('fs');
-var Book = require("./book");
+var Book = require('./book');
 
 function Sitio(params) {
-	if(params.url != undefined) {
+	if(params.url) {
 		this.timeToGetBooks = 0;
 		this.inicio = params.inicio;
 		this.final = params.final;
@@ -31,7 +33,7 @@ function Sitio(params) {
 
 Sitio.prototype.getDominio = function() {
 	var dominio = urlParser.parse(this.url);
-	if(dominio.hostname != undefined) {
+	if(dominio.hostname) {
 		this.dominio = dominio.hostname;
 	}
 	return this;
@@ -119,20 +121,20 @@ Sitio.prototype.getLibros = function() {
 	if(this.links) {
 		var tiempoInicial = new Date();		
 		var q = async.queue(function (task, callback) {
-			var command  = 'casperjs getDetail.js "' + 'http://' + that.dominio + task + '" \'' + JSON.stringify(config.recursos[that.codigo]) + '\' ' + that.codigo;
+			var command  = 'casperjs getDetail.js '' + 'http://' + that.dominio + task + '' \'' + JSON.stringify(config.recursos[that.codigo]) + '\' ' + that.codigo;
 			that.getBookData(command, {encoding:'utf-8'})
 				.then(function(data) {
 					var libro = JSON.parse(data);
 					console.log(libro);
 					if(libro === null) {
-						throw new Error("llego con null");
+						throw new Error('llego con null');
 					}
-					if(!libro.isbn || !libro.precio) {
-						throw new Error("no tiene isbn");
+					if(!libro.precio) {
+						throw new Error('no tiene isbn');
 					}
 
-					if(!libro.isbn || !libro.precio) {
-						throw new Error("no tiene precio");
+					if(!libro.precio) {
+						throw new Error('no tiene precio');
 					}	
 					that.libros.push(libro);
 					return libro;
@@ -147,7 +149,7 @@ Sitio.prototype.getLibros = function() {
 					try {
 						var libro = new Book(data, that.nombre, that.identificador);
 					} catch(e) {
-						throw new Error("no se pudo crear el libro");
+						throw new Error('no se pudo crear el libro');
 					}
 					return libro.guardarLibro();
 				})
@@ -158,7 +160,7 @@ Sitio.prototype.getLibros = function() {
 					console.log(err);
 					callback(err);
 				})
-		}, 5);
+		}, 6);
 
 		for(var x = 0; x < this.linksLen; x++) {
 			q.push(this.links[x]);

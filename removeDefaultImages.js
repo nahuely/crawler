@@ -1,13 +1,14 @@
+'use strict';
+
 var fs = require('fs');
-var async = require('async');
 var imageDefault = './default.jpg';
 var imageSize = fs.statSync(imageDefault).size;
 var imagenesFiltradas = [];
 var sizeOf = require('image-size');
 
-var mongoose = require("mongoose");
+var mongoose = require('mongoose');
 var Q = require('q');
-mongoose.connect("mongodb://127.0.0.1:27017/casadellibro");
+mongoose.connect('mongodb://127.0.0.1:27017/casadellibro');
 
 var libroSchema = new mongoose.Schema({
 	_id: String,
@@ -29,7 +30,7 @@ var libroSchema = new mongoose.Schema({
 	status: String
 });
 
-var libro = mongoose.model("libro", libroSchema);
+var libro = mongoose.model('libro', libroSchema);
 
 
 var imagenes = fs.readdirSync('./images');
@@ -45,7 +46,7 @@ imagenes.forEach(function(item) {
 			hasWrongSize = true;
 		}
 	} catch(e) {
-		if(e.message === "unsupported file type") {
+		if(e.message === 'unsupported file type') {
 			hasWrongSize = true;
 		}
 	} finally {

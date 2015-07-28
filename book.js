@@ -1,7 +1,9 @@
-var config = require("./config");
-var mongoose = require("mongoose");
+'use strict';
+
+var config = require('./config');
+var mongoose = require('mongoose');
 var Q = require('q');
-mongoose.connect("mongodb://127.0.0.1:27017/casadellibro");
+mongoose.connect('mongodb://127.0.0.1:27017/casadellibro');
 
 var libroSchema = new mongoose.Schema({
 	_id: String,
@@ -23,7 +25,7 @@ var libroSchema = new mongoose.Schema({
 	status: String
 });
 
-var libro = mongoose.model("libro", libroSchema);
+var libro = mongoose.model('libro', libroSchema);
 
 function Book(data, libreria, identificador) {
 	this.isbn = data.isbn || '';

@@ -9,6 +9,7 @@ el crawler recorre el paginado, o la categoria que se le pase por linea de coman
 la base de datos tendra la siguiente estructura, titulo, isbn, precio, url de la imagen(thumbnail , y picurl), precio, peso, cantidad de paginas, fecha de creacion del item, libreria, categoria, store category
 
 uso: crawler -u url -p factor precio -o nombre de archivo -s todo o solo en stock -d debug activo -f subir a ftp automaticamenteo no -c categoria -sc categoria en el store*/
+'use strict';
 
 var argumentos = require('optimist').argv;
 var config = require('./config');
@@ -28,9 +29,3 @@ sitio.getLinks()
 	.catch(function(err) {
 		console.log(err)
 	})
-
-
-//(function() {
-//	console.log(sitio)
-//	sitio.getLibros();
-//})

@@ -7,6 +7,8 @@ Autor:
 Flujo del programa:
 uso: generadorCsv --output nombre de archivo --debug true|false --identificador string --filto json
 */
+'use strict';
+
 var async = require("async");
 var argumentos = require("optimist").argv;
 var Csv = require("./csv");

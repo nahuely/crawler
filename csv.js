@@ -1,7 +1,9 @@
-var fs = require("fs");
-var mongoose = require("mongoose");
+'use strict';
+
+var fs = require('fs');
+var mongoose = require('mongoose');
 var Q = require('q');
-mongoose.connect("mongodb://127.0.0.1:27017/casadellibro");
+mongoose.connect('mongodb://127.0.0.1:27017/casadellibro');
 var merge = require('merge');
 var htmlencode = require('htmlencode');
 
@@ -25,7 +27,7 @@ var libroSchema = new mongoose.Schema({
 	status: String
 });
 
-var libroDb = mongoose.model("libro", libroSchema);
+var libroDb = mongoose.model('libro', libroSchema);
 
 function Csv(identificador, output, debug, filtro, porcentaje, ebayCategory, storeCategory) {
 	this.identificador = identificador;
@@ -94,16 +96,16 @@ Csv.prototype.generarCsv = function(json) {
 			var envio = this.calcularCostoEnvio(json[x].paginas, json[x].encuadernacion, json[x].precio);
 			var precio = this.calcularPrecio(json[x].precio) + envio;
 
-			descAux = '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><font size="5" face="Verdana"><b>Descripci&#243;n del art&#237;culo/Article Description</b></font></p>';
-			descAux += json[x].titulo ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><font size="4" face="Verdana">T&#237;tulo/Title:<b>{{titulo}}</b></font></p>'.replace('{{titulo}}', htmlencode.htmlEncode(json[x].titulo)) : '';
-			descAux += json[x].isbn ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><span style="font-family: Verdana; font-size: large;">ISBN:&nbsp;</span><font color="#000000" style="font-family: Verdana; font-size: large;"><b>{{isbn}}</b></font></p>'.replace('{{isbn}}', json[x].isbn) : '';
-			descAux += json[x].autor ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><font size="4" face="Verdana">Autor(es)/Author(s):&nbsp;<font color="#000000"><b>{{autor}}</b></font><br></font></p>'.replace('{{autor}}', htmlencode.htmlEncode(json[x].autor)) : '';
-			descAux += json[x].editorial ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><font size="4" face="Verdana">Editorial/Publisher:&nbsp;<font color="#000000"><b>{{editorial}}</b></font><br></font></p>'.replace('{{editorial}}', htmlencode.htmlEncode(json[x].editorial.toUpperCase())) : '';
-			descAux += json[x].paginas ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><font size="4" face="Verdana">N&#250;mero de P&#225;ginas/Number of Pages:&nbsp;<font color="#000000"><b>{{paginas}}</b></font></font></p>'.replace('{{paginas}}', json[x].paginas) : '';
-			descAux += json[x].encuadernacion ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><font face="Verdana" size="4">Encuadernaci&#243;n/Binding:<b>{{encuadernacion}}</b></font></p>'.replace('{{encuadernacion}}', htmlencode.htmlEncode(json[x].encuadernacion.toUpperCase())) : '';
-			descAux += json[x].idioma ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><span style="font-family: Verdana; font-size: large;">Idioma/Language:&nbsp;</span><font color="#000000" style="font-family: Verdana; font-size: large;"><b>{{idioma}}</b></font></p>'.replace('{{idioma}}', htmlencode.htmlEncode(json[x].idioma.toUpperCase())) : '';
-			descAux += json[x].descripcion ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><span style="font-family: Verdana; font-size: large;"><b>Sinopsis/Synopsis:&nbsp;</b></span></p>' : '';
-			descAux += json[x].descripcion ? '<p align="left" style="margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;"><span style="font-family: Verdana; font-size: large;">{{descripcion}}</span></p>'.replace('{{descripcion}}', htmlencode.htmlEncode(json[x].descripcion)) : '';
+			descAux = "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><font size='5' face='Verdana'><b>Descripci&#243;n del art&#237;culo/Article Description</b></font></p>";
+			descAux += json[x].titulo ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><font size='4' face='Verdana'>T&#237;tulo/Title:<b>{{titulo}}</b></font></p>".replace('{{titulo}}', htmlencode.htmlEncode(json[x].titulo)) : '';
+			descAux += json[x].isbn ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><span style='font-family: Verdana; font-size: large;'>ISBN:&nbsp;</span><font color='#000000' style='font-family: Verdana; font-size: large;'><b>{{isbn}}</b></font></p>".replace('{{isbn}}', json[x].isbn) : '';
+			descAux += json[x].autor ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><font size='4' face='Verdana'>Autor(es)/Author(s):&nbsp;<font color='#000000'><b>{{autor}}</b></font><br></font></p>".replace('{{autor}}', htmlencode.htmlEncode(json[x].autor)) : '';
+			descAux += json[x].editorial ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><font size='4' face='Verdana'>Editorial/Publisher:&nbsp;<font color='#000000'><b>{{editorial}}</b></font><br></font></p>".replace('{{editorial}}', htmlencode.htmlEncode(json[x].editorial.toUpperCase())) : '';
+			descAux += json[x].paginas ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><font size='4' face='Verdana'>N&#250;mero de P&#225;ginas/Number of Pages:&nbsp;<font color='#000000'><b>{{paginas}}</b></font></font></p>".replace('{{paginas}}', json[x].paginas) : '';
+			descAux += json[x].encuadernacion ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><font face='Verdana' size='4'>Encuadernaci&#243;n/Binding:<b>{{encuadernacion}}</b></font></p>".replace('{{encuadernacion}}', htmlencode.htmlEncode(json[x].encuadernacion.toUpperCase())) : '';
+			descAux += json[x].idioma ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><span style='font-family: Verdana; font-size: large;'>Idioma/Language:&nbsp;</span><font color='#000000' style='font-family: Verdana; font-size: large;'><b>{{idioma}}</b></font></p>".replace('{{idioma}}', htmlencode.htmlEncode(json[x].idioma.toUpperCase())) : '';
+			descAux += json[x].descripcion ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><span style='font-family: Verdana; font-size: large;'><b>Sinopsis/Synopsis:&nbsp;</b></span></p>" : '';
+			descAux += json[x].descripcion ? "<p align='left' style='margin-bottom: 0.49cm; direction: ltr; widows: 2; orphans: 2;'><span style='font-family: Verdana; font-size: large;'>{{descripcion}}</span></p>".replace('{{descripcion}}', htmlencode.htmlEncode(json[x].descripcion)) : '';
 			descAux = descAux.replace(/&#10;|undefined/g, '<br>');
 
 			string += "Add,";
@@ -111,7 +113,7 @@ Csv.prototype.generarCsv = function(json) {
 			string += "\"" + htmlencode.htmlEncode(json[x].titulo) + "\"" + ",";
 			string += "\"" + descAux + "\"" + ",";
 			string += "1000,";
-			string += this.baseUrl + json[x].isbn + '.jpg' + "," || ",";
+			string += json[x].picUrl ? this.baseUrl + json[x].isbn + '.jpg,' : this.baseUrl + "default.jpg,";
 			string += "1,";
 			string += "FixedPriceItem,";
 			string += precio + "," || ",";
