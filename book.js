@@ -3,7 +3,7 @@
 var config = require('./config');
 var mongoose = require('mongoose');
 var Q = require('q');
-mongoose.connect('mongodb://127.0.0.1:27017/casadellibro');
+mongoose.connect(config.db);
 
 var libroSchema = new mongoose.Schema({
 	_id: String,
